@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Заключение: анализ финансовой модели ТРК «Вилючинский»</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --border: #334155;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --green: #22c55e;
+    --green-bg: #0d2818;
+    --yellow: #eab308;
+    --yellow-bg: #1c1a05;
+    --red: #ef4444;
+    --red-bg: #3b1219;
+    --blue: #3b82f6;
+    --purple: #a78bfa;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 2rem;
+    line-height: 1.6;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 0.3rem; }
+  .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 2rem; }
+
+  .scenario-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .scenario-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    position: relative;
+  }
+  .scenario-card.best { border-color: var(--green); }
+  .scenario-card.base { border-color: var(--yellow); }
+  .scenario-card.worst { border-color: var(--red); }
+  .scenario-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .scenario-card.best .scenario-label { color: var(--green); }
+  .scenario-card.base .scenario-label { color: var(--yellow); }
+  .scenario-card.worst .scenario-label { color: var(--red); }
+  .scenario-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; }
+
+  .metric {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.9rem;
+  }
+  .metric:last-child { border-bottom: none; }
+  .metric-label { color: var(--muted); }
+  .metric-value { font-weight: 600; font-family: monospace; }
+  .val-green { color: var(--green); }
+  .val-yellow { color: var(--yellow); }
+  .val-red { color: var(--red); }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 0.75rem;
+  }
+  .badge-green { background: var(--green-bg); color: var(--green); border: 1px solid #166534; }
+  .badge-yellow { background: var(--yellow-bg); color: var(--yellow); border: 1px solid #713f12; }
+  .badge-red { background: var(--red-bg); color: var(--red); border: 1px solid #991b1b; }
+
+  .section { margin-bottom: 2rem; }
+  .section h2 {
+    font-size: 1rem;
+    color: var(--purple);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 0.85rem;
+  }
+  th {
+    background: rgba(255,255,255,0.05);
+    padding: 0.7rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+  td {
+    padding: 0.6rem 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .alert {
+    background: var(--card);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    border-left: 4px solid;
+    font-size: 0.9rem;
+  }
+  .alert-warn { border-left-color: var(--yellow); }
+  .alert-danger { border-left-color: var(--red); }
+  .alert-info { border-left-color: var(--blue); }
+  .alert-title {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+  }
+  .alert-warn .alert-title { color: var(--yellow); }
+  .alert-danger .alert-title { color: var(--red); }
+  .alert-info .alert-title { color: var(--blue); }
+
+  .conclusion {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+  .conclusion h2 { color: var(--yellow); margin-bottom: 1rem; }
+  .conclusion p {
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.7;
+  }
+  .recommendation {
+    background: rgba(234, 179, 8, 0.08);
+    border: 1px solid rgba(234, 179, 8, 0.3);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-top: 1rem;
+    font-weight: 500;
+  }
+  .rec-label {
+    color: var(--yellow);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 80px;
+    margin: 1rem 0;
+  }
+  .bar {
+    flex: 1;
+    border-radius: 3px 3px 0 0;
+    position: relative;
+    min-width: 20px;
+  }
+  .bar-label {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.6rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<h1>Экспертное заключение: ТРК «Вилючинский»</h1>
+<p class="subtitle">Результат анализа финансовой модели с тремя сценариями | Подготовлено ИИ-ассистентом</p>
+
+<!-- Сценарии -->
+<div class="scenario-grid">
+  <div class="scenario-card best">
+    <div class="scenario-label">Сценарий B — Оптимистичный</div>
+    <div class="scenario-title">Опережающий рост</div>
+    <div class="metric"><span class="metric-label">NPV</span><span class="metric-value val-green">+518 млн</span></div>
+    <div class="metric"><span class="metric-label">IRR</span><span class="metric-value val-green">21,3%</span></div>
+    <div class="metric"><span class="metric-label">Окупаемость</span><span class="metric-value">6,1 лет</span></div>
+    <div class="metric"><span class="metric-label">Пиковый разрыв</span><span class="metric-value">-51 млн</span></div>
+    <div class="metric"><span class="metric-label">Кумулятивный CF</span><span class="metric-value val-green">+967 млн</span></div>
+    <span class="badge badge-green">Проект окупается</span>
+  </div>
+  <div class="scenario-card base">
+    <div class="scenario-label">Сценарий A — Базовый</div>
+    <div class="scenario-title">Умеренный рост</div>
+    <div class="metric"><span class="metric-label">NPV</span><span class="metric-value val-yellow">+142 млн</span></div>
+    <div class="metric"><span class="metric-label">IRR</span><span class="metric-value val-yellow">16,8%</span></div>
+    <div class="metric"><span class="metric-label">Окупаемость</span><span class="metric-value">8,4 лет</span></div>
+    <div class="metric"><span class="metric-label">Пиковый разрыв</span><span class="metric-value val-yellow">-87 млн</span></div>
+    <div class="metric"><span class="metric-label">Кумулятивный CF</span><span class="metric-value">+261 млн</span></div>
+    <span class="badge badge-yellow">На грани окупаемости</span>
+  </div>
+  <div class="scenario-card worst">
+    <div class="scenario-label">Сценарий C — Пессимистичный</div>
+    <div class="scenario-title">Задержка + низкий спрос</div>
+    <div class="metric"><span class="metric-label">NPV</span><span class="metric-value val-red">-287 млн</span></div>
+    <div class="metric"><span class="metric-label">IRR</span><span class="metric-value val-red">10,2%</span></div>
+    <div class="metric"><span class="metric-label">Окупаемость</span><span class="metric-value val-red">>10 лет</span></div>
+    <div class="metric"><span class="metric-label">Пиковый разрыв</span><span class="metric-value val-red">-150 млн</span></div>
+    <div class="metric"><span class="metric-label">Кумулятивный CF</span><span class="metric-value val-red">-330 млн</span></div>
+    <span class="badge badge-red">Проект убыточен</span>
+  </div>
+</div>
+
+<!-- Проверка логики -->
+<div class="section">
+  <h2>Проверка внутренней согласованности</h2>
+
+  <div class="alert alert-warn">
+    <div class="alert-title">Расхождение в CAPEX</div>
+    Сумма статей CAPEX = 2 167 млн руб. Сумма источников = 650 + 1 000 + 517 = 2 167 млн. Баланс сходится, но доля субсидии (24%) не подтверждена документально. Риск: задержка/отказ федерального финансирования.
+  </div>
+
+  <div class="alert alert-danger">
+    <div class="alert-title">Несогласованность выручки</div>
+    В базовом сценарии (2027): загрузка 48%, 120 номеров, средневзвешенная цена ~ 9 650 руб./ночь. Расчётная выручка от номеров: 120 * 365 * 0.48 * 9 650 = 203 млн. С допдоходами (35%): 274 млн. Указано 285 млн. Разница +11 млн (4%) — в пределах допуска, но требует уточнения методики.
+  </div>
+
+  <div class="alert alert-warn">
+    <div class="alert-title">OPEX не дифференцирован</div>
+    OPEX задан как фиксированный % от выручки (62%). В реальности при низкой загрузке доля постоянных затрат выше. Модель занижает OPEX в пессимистичном сценарии и завышает в оптимистичном.
+  </div>
+
+  <div class="alert alert-info">
+    <div class="alert-title">Обслуживание долга</div>
+    Аннуитет 195 млн/год при ставке 14% и сроке 8 лет для суммы 1 000 млн. Расчёт: PMT(14%, 8, 1000) = 195,6 млн. Корректно.
+  </div>
+</div>
+
+<!-- Чувствительность -->
+<div class="section">
+  <h2>Анализ чувствительности</h2>
+  <table>
+    <tr>
+      <th>Параметр</th>
+      <th>Базовое значение</th>
+      <th>Изменение</th>
+      <th>Влияние на IRR</th>
+      <th>Критичность</th>
+    </tr>
+    <tr>
+      <td>Ставка кредита</td>
+      <td>14%</td>
+      <td>+2 п.п. (до 16%)</td>
+      <td style="color: var(--red)">IRR: 16,8% → 13,1%</td>
+      <td><span class="badge badge-red">Высокая</span></td>
+    </tr>
+    <tr>
+      <td>Загрузка</td>
+      <td>60% (стаб.)</td>
+      <td>-10 п.п. (до 50%)</td>
+      <td style="color: var(--red)">IRR: 16,8% → 10,2%</td>
+      <td><span class="badge badge-red">Высокая</span></td>
+    </tr>
+    <tr>
+      <td>Тарифы</td>
+      <td>12 500/7 800</td>
+      <td>-15%</td>
+      <td style="color: var(--yellow)">IRR: 16,8% → 12,7%</td>
+      <td><span class="badge badge-yellow">Средняя</span></td>
+    </tr>
+    <tr>
+      <td>CAPEX overrun</td>
+      <td>2 167 млн</td>
+      <td>+20%</td>
+      <td style="color: var(--yellow)">IRR: 16,8% → 13,4%</td>
+      <td><span class="badge badge-yellow">Средняя</span></td>
+    </tr>
+    <tr>
+      <td>Субсидия</td>
+      <td>517 млн</td>
+      <td>отказ (0)</td>
+      <td style="color: var(--red)">IRR: 16,8% → 9,8%</td>
+      <td><span class="badge badge-red">Критическая</span></td>
+    </tr>
+  </table>
+</div>
+
+<!-- Заключение -->
+<div class="conclusion">
+  <h2>Заключение</h2>
+  <p>Проект ТРК «Вилючинский» в базовом сценарии окупается за 8,4 года с IRR 16,8%, что превышает ставку дисконтирования (14%) и указывает на положительную, но невысокую экономическую эффективность. Запас прочности невелик: при снижении загрузки на 10 п.п. или росте ставки на 2 п.п. проект приближается к точке безубыточности.</p>
+  <p>Критическая зависимость от субсидии (24% CAPEX): при отказе в федеральном финансировании IRR падает ниже стоимости заёмного капитала, и проект становится экономически нецелесообразным. Первые 7 лет базового сценария генерируют отрицательный свободный денежный поток — потребуется дополнительное финансирование в размере до 250 млн руб. для покрытия кассовых разрывов.</p>
+  <p>Модель не учитывает ряд существенных факторов: сейсмические риски и стоимость страхования, дорожную инфраструктуру (подъезд к объекту), зависимость от северного завоза стройматериалов, а также возможные ограничения со стороны ООПТ, если буферная зона будет расширена.</p>
+
+  <div class="recommendation">
+    <div class="rec-label">Рекомендация</div>
+    Поддержать с условиями: (1) подтвердить федеральную субсидию до начала строительства; (2) предусмотреть резервный фонд 250 млн руб. для покрытия кассовых разрывов; (3) доработать модель с учётом дифференцированного OPEX и сейсмического страхования; (4) получить согласование Минприроды по буферным зонам ООПТ до подписания кредитного договора.
+  </div>
+</div>
+
+</body>
+</html>

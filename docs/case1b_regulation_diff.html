@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Сравнение редакций — Порядок предоставления субсидий</title>
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --card: #16213e;
+    --border: #334155;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --del-bg: #3b1219;
+    --del-text: #fca5a5;
+    --del-border: #991b1b;
+    --ins-bg: #0d2818;
+    --ins-text: #86efac;
+    --ins-border: #166534;
+    --mod-bg: #1e1b4b;
+    --mod-text: #c4b5fd;
+    --mod-border: #4c1d95;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #f1f5f9;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+  }
+  .legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+  }
+  .legend-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+  }
+  .dot-del { background: var(--del-bg); border: 1px solid var(--del-border); }
+  .dot-ins { background: var(--ins-bg); border: 1px solid var(--ins-border); }
+  .dot-mod { background: var(--mod-bg); border: 1px solid var(--mod-border); }
+
+  .change-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .change-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+  .change-ref {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-family: monospace;
+  }
+  .change-type {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .type-semantic {
+    background: var(--mod-bg);
+    color: var(--mod-text);
+    border: 1px solid var(--mod-border);
+  }
+  .type-editorial {
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .type-new {
+    background: var(--ins-bg);
+    color: var(--ins-text);
+    border: 1px solid var(--ins-border);
+  }
+  .type-removed {
+    background: var(--del-bg);
+    color: var(--del-text);
+    border: 1px solid var(--del-border);
+  }
+
+  .diff-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  .diff-old, .diff-new {
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+  }
+  .diff-old {
+    background: var(--del-bg);
+    border-left: 3px solid var(--del-border);
+  }
+  .diff-new {
+    background: var(--ins-bg);
+    border-left: 3px solid var(--ins-border);
+  }
+  .diff-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+  }
+  .diff-old .diff-label { color: var(--del-text); }
+  .diff-new .diff-label { color: var(--ins-text); }
+
+  del {
+    text-decoration: none;
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--del-text);
+    padding: 1px 2px;
+    border-radius: 2px;
+  }
+  ins {
+    text-decoration: none;
+    background: rgba(34, 197, 94, 0.2);
+    color: var(--ins-text);
+    padding: 1px 2px;
+    border-radius: 2px;
+  }
+
+  .comment {
+    background: rgba(99, 102, 241, 0.1);
+    border-left: 3px solid var(--mod-border);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    color: var(--mod-text);
+    border-radius: 0 4px 4px 0;
+    margin-top: 0.5rem;
+  }
+
+  .summary {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-top: 2rem;
+  }
+  .summary h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+    color: #fbbf24;
+  }
+  .summary ul {
+    list-style: none;
+    padding: 0;
+  }
+  .summary li {
+    padding: 0.3rem 0;
+    padding-left: 1.2rem;
+    position: relative;
+    font-size: 0.9rem;
+  }
+  .summary li::before {
+    content: '>';
+    position: absolute;
+    left: 0;
+    color: var(--muted);
+    font-family: monospace;
+  }
+
+  .stats {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat-num {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .stat-del .stat-num { color: var(--del-text); }
+  .stat-ins .stat-num { color: var(--ins-text); }
+  .stat-mod .stat-num { color: var(--mod-text); }
+</style>
+</head>
+<body>
+
+<h1>Сравнение редакций: Порядок предоставления субсидий СМСП в сфере туризма</h1>
+<p class="subtitle">Действующая редакция (пост. № 312-П от 18.07.2024) vs Проект изменений (апрель 2026)</p>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot dot-del"></div> Удалено</div>
+  <div class="legend-item"><div class="legend-dot dot-ins"></div> Добавлено</div>
+  <div class="legend-item"><div class="legend-dot dot-mod"></div> Смысловое изменение</div>
+</div>
+
+<!-- Изменение 1 -->
+<div class="change-card">
+  <div class="change-header">
+    <span class="change-ref">п. 1.1</span>
+    <span class="change-type type-semantic">Смысловое</span>
+  </div>
+  <div class="diff-row">
+    <div class="diff-old">
+      <div class="diff-label">Было</div>
+      ...в сфере <del>туризма</del> на территории Камчатского края
+    </div>
+    <div class="diff-new">
+      <div class="diff-label">Стало</div>
+      ...в сфере <ins>туризма и гостеприимства</ins> на территории Камчатского края
+    </div>
+  </div>
+  <div class="comment">Расширение сферы действия: теперь включает гостиничный бизнес и объекты гостеприимства, не только туроператоров</div>
+</div>
+
+<!-- Изменение 2 -->
+<div class="change-card">
+  <div class="change-header">
+    <span class="change-ref">п. 1.2</span>
+    <span class="change-type type-semantic">Смысловое</span>
+  </div>
+  <div class="diff-row">
+    <div class="diff-old">
+      <div class="diff-label">Было</div>
+      ...связанных с реализацией проектов по развитию <del>внутреннего и въездного</del> туризма
+    </div>
+    <div class="diff-new">
+      <div class="diff-label">Стало</div>
+      ...связанных с реализацией проектов по развитию <ins>внутреннего, въездного и экологического</ins> туризма, <ins>а также объектов туристической инфраструктуры</ins>
+    </div>
+  </div>
+  <div class="comment">Добавлен экологический туризм и инфраструктурные объекты как отдельная категория. Существенно расширяет перечень субсидируемых затрат</div>
+</div>
+
+<!-- Изменение 3 — новый пункт -->
+<div class="change-card">
+  <div class="change-header">
+    <span class="change-ref">п. 1.5 (новый)</span>
+    <span class="change-type type-new">Добавлено</span>
+  </div>
+  <div class="diff-row">
+    <div class="diff-old">
+      <div class="diff-label">Было</div>
+      <em style="color: var(--muted);">Пункт отсутствовал</em>
+    </div>
+    <div class="diff-new">
+      <div class="diff-label">Стало</div>
+      <ins>Приоритетными направлениями субсидирования являются: экологический туризм, этнографический туризм, круизный туризм, развитие всесезонной туристической инфраструктуры</ins>
+    </div>
+  </div>
+  <div class="comment">Фиксирует приоритеты. Может влиять на оценку заявок — проекты вне приоритетов получат меньше баллов по п. 3.4г</div>
+</div>
+
+<!-- Изменение 4 -->
+<div class="change-card">
+  <div class="change-header">
+    <span class="change-ref">п. 2.1а</span>
+    <span class="change-type type-semantic">Смысловое</span>
+  </div>
+  <div class="diff-row">
+    <div class="diff-old">
+      <div class="diff-label">Было</div>
+      ...не менее <del>12 месяцев</del>
+    </div>
+    <div class="diff-new">
+      <div class="diff-label">Стало</div>
+      ...не менее <ins>6 месяцев</ins>
+    </div>
+  </div>
+  <div class="comment">Снижение порога входа вдвое — больше новых предпринимателей смогут претендовать. Риск: менее проверенные бизнесы</div>
+</div>
+
+<!-- Изменение 5 -->
+<div class="change-card">
+  <div class="change-header">
+    <span class="change-ref">п. 2.1б</span>
+    <span class="change-type type-semantic">Смысловое</span>
+  </div>
+  <div class="diff-row">
+    <div class="diff-old">
+      <div class="diff-label">Было</div>
+      <del>основной</del> вид деятельности относится к классу ОКВЭД <del>79</del>
+    </div>
+    <div class="diff-new">
+      <div class="diff-label">Стало</div>
+      <ins>основной или дополнительный</ins> вид деятельности относится к классам ОКВЭД <ins>79, 55 или 93.29</ins>
+    </div>
+  </div>
+  <div class="comment">Двойное расширение: (1) достаточно дополнительного ОКВЭД, (2) добавлены коды размещения и развлечений. Существенно расширяет круг получателей</div>
+</div>
+
+<!-- Изменение 6 -->
+<div class="change-card">
+  <div class="change-header">
+    <span class="change-ref">п. 2.1д</span>
+    <span class="change-type type-semantic">Смысловое</span>
+  </div>
+  <div class="diff-row">
+    <div class="diff-old">
+      <div class="diff-label">Было</div>
+      ...не менее <del>3</del> человек
+    </div>
+    <div class="diff-new">
+      <div class="diff-label">Стало</div>
+      ...не менее <ins>1</ins> человека
+    </div>
+  </div>
+  <div class="comment">Микропредприятия и ИП без наёмных работников теперь допускаются. Важно в контексте труднодоступных территорий</div>
+</div>
+
+<!-- Изменение 7 -->
+<div class="change-card">
+  <div class="change-header">
+    <span class="change-ref">п. 2.2</span>
+    <span class="change-type type-semantic">Смысловое</span>
+  </div>
+  <div class="diff-row">
+    <div class="diff-old">
+      <div class="diff-label">Было</div>
+      Максимальный размер субсидии составляет <del>1 500 000</del> рублей
+    </div>
+    <div class="diff-new">
+      <div class="diff-label">Стало</div>
+      Максимальный размер субсидии составляет <ins>3 000 000</ins> рублей
+    </div>
+  </div>
+  <div class="comment">Двукратное увеличение потолка. Требует оценки достаточности бюджетных ассигнований</div>
+</div>
+
+<!-- Изменение 8 -->
+<div class="change-card">
+  <div class="change-header">
+    <span class="change-ref">п. 2.3</span>
+    <span class="change-type type-semantic">Смысловое</span>
+  </div>
+  <div class="diff-row">
+    <div class="diff-old">
+      <div class="diff-label">Было</div>
+      ...не более <del>50%</del> фактически понесённых затрат
+    </div>
+    <div class="diff-new">
+      <div class="diff-label">Стало</div>
+      ...не более <ins>70%</ins> для проектов <ins>в труднодоступных и отдалённых местностях</ins> и не более 50% — для остальных территорий
+    </div>
+  </div>
+  <div class="comment">Дифференциация по территории — стимулирование инвестиций в отдалённые районы. Необходим перечень «труднодоступных местностей»</div>
+</div>
+
+<!-- Изменение 9 — новый пункт -->
+<div class="change-card">
+  <div class="change-header">
+    <span class="change-ref">п. 2.4 (новый)</span>
+    <span class="change-type type-new">Добавлено</span>
+  </div>
+  <div class="diff-row">
+    <div class="diff-old">
+      <div class="diff-label">Было</div>
+      <em style="color: var(--muted);">Пункт отсутствовал</em>
+    </div>
+    <div class="diff-new">
+      <div class="diff-label">Стало</div>
+      <ins>Для самозанятых граждан максимальный размер субсидии — 500 000 руб. Условие по численности не применяется</ins>
+    </div>
+  </div>
+  <div class="comment">Впервые включены самозанятые. Отдельный лимит и исключение из условия по численности</div>
+</div>
+
+<!-- Изменение 10 -->
+<div class="change-card">
+  <div class="change-header">
+    <span class="change-ref">п. 3.1</span>
+    <span class="change-type type-semantic">Смысловое</span>
+  </div>
+  <div class="diff-row">
+    <div class="diff-old">
+      <div class="diff-label">Было</div>
+      Приём заявок осуществляется <del>два раза в год: с 1 февраля по 1 марта и с 1 августа по 1 сентября</del>
+    </div>
+    <div class="diff-new">
+      <div class="diff-label">Стало</div>
+      Приём заявок осуществляется <ins>на постоянной основе. Конкурсный отбор проводится ежеквартально</ins>
+    </div>
+  </div>
+  <div class="comment">Переход от двух окон к непрерывному приёму. Снижает барьер входа, но увеличивает нагрузку на Агентство</div>
+</div>
+
+<!-- Изменение 11 -->
+<div class="change-card">
+  <div class="change-header">
+    <span class="change-ref">п. 3.3</span>
+    <span class="change-type type-semantic">Смысловое</span>
+  </div>
+  <div class="diff-row">
+    <div class="diff-old">
+      <div class="diff-label">Было</div>
+      ...в течение <del>30</del> рабочих дней
+    </div>
+    <div class="diff-new">
+      <div class="diff-label">Стало</div>
+      ...в течение <ins>20</ins> рабочих дней
+    </div>
+  </div>
+  <div class="comment">Сокращение срока рассмотрения на 10 дней. Ускоряет процесс, но требует больше ресурсов</div>
+</div>
+
+<!-- Изменение 12 -->
+<div class="change-card">
+  <div class="change-header">
+    <span class="change-ref">п. 3.4д (новый критерий)</span>
+    <span class="change-type type-new">Добавлено</span>
+  </div>
+  <div class="diff-row">
+    <div class="diff-old">
+      <div class="diff-label">Было</div>
+      4 критерия, макс. 100 баллов (30+20+20+30)
+    </div>
+    <div class="diff-new">
+      <div class="diff-label">Стало</div>
+      5 критериев, макс. 100 баллов (25+20+15+25+<ins>15 — экологическая устойчивость</ins>)
+    </div>
+  </div>
+  <div class="comment">Перебалансировка весов: снижены «экономика» (30→25) и «инновационность» (20→15). Добавлен экологический критерий. Проходной балл снижен с 60 до 50</div>
+</div>
+
+<!-- Изменение 13 -->
+<div class="change-card">
+  <div class="change-header">
+    <span class="change-ref">п. 4.1</span>
+    <span class="change-type type-semantic">Смысловое</span>
+  </div>
+  <div class="diff-row">
+    <div class="diff-old">
+      <div class="diff-label">Было</div>
+      ...отчёт о целевом использовании в течение <del>60 календарных дней после окончания</del> реализации проекта
+    </div>
+    <div class="diff-new">
+      <div class="diff-label">Стало</div>
+      ...<ins>промежуточный отчёт через 6 месяцев</ins> после получения субсидии и итоговый отчёт — в течение <ins>30 календарных дней</ins> после окончания реализации
+    </div>
+  </div>
+  <div class="comment">Двухэтапная отчётность: промежуточный контроль через полгода + ужесточение срока итогового отчёта (60→30 дней)</div>
+</div>
+
+<!-- Изменение 14 — новый пункт -->
+<div class="change-card">
+  <div class="change-header">
+    <span class="change-ref">п. 4.5 (новый)</span>
+    <span class="change-type type-new">Добавлено</span>
+  </div>
+  <div class="diff-row">
+    <div class="diff-old">
+      <div class="diff-label">Было</div>
+      <em style="color: var(--muted);">Пункт отсутствовал</em>
+    </div>
+    <div class="diff-new">
+      <div class="diff-label">Стало</div>
+      <ins>Результаты предоставления субсидий публикуются на официальном сайте Агентства не позднее 10 рабочих дней</ins>
+    </div>
+  </div>
+  <div class="comment">Требование публичной прозрачности — соответствует тренду на открытость бюджетных расходов</div>
+</div>
+
+<!-- Summary -->
+<div class="summary">
+  <h2>Ключевые изменения</h2>
+  <ul>
+    <li><strong>Расширение круга получателей:</strong> снижен срок регистрации (12→6 мес.), допущены дополнительные ОКВЭД, самозанятые, микропредприятия от 1 чел.</li>
+    <li><strong>Увеличение финансирования:</strong> потолок субсидии удвоен (1,5→3 млн), для труднодоступных местностей — до 70% затрат</li>
+    <li><strong>Упрощение процедуры:</strong> непрерывный приём заявок, электронная подача, сокращение сроков рассмотрения</li>
+    <li><strong>Экологический акцент:</strong> новый критерий оценки, приоритет экотуризма, согласование ООПТ</li>
+    <li><strong>Усиление контроля:</strong> промежуточная отчётность, публикация результатов, сокращение срока возврата</li>
+  </ul>
+
+  <div class="stats">
+    <div class="stat stat-mod">
+      <div class="stat-num">9</div>
+      <div class="stat-label">Смысловых изменений</div>
+    </div>
+    <div class="stat stat-ins">
+      <div class="stat-num">4</div>
+      <div class="stat-label">Новых пунктов</div>
+    </div>
+    <div class="stat stat-del">
+      <div class="stat-num">0</div>
+      <div class="stat-label">Удалённых пунктов</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
